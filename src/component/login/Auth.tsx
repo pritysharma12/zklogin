@@ -237,7 +237,6 @@ function AuthComponent() {
       </div>
 
       {activeStep === 1 && (
-        <div>
           <Box
             sx={{
               mt: "24px",
@@ -469,28 +468,25 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       );
 
                       if (serializedKeyPair) {
-                        try {
-                          const deserializedKeyPair: Ed25519Keypair =
-                            JSON.parse(serializedKeyPair);
+                        const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(
+                          fromB64(serializedKeyPair)
+                        );
 
-                          setEphemeralKeyPair(deserializedKeyPair);
-                        } catch (error) {
-                          console.error(
-                            "Failed to parse and set the key pair:",
-                            error
+                        setEphemeralKeyPair(ephemeralKeyPair);
+
+                        const extendedEphemeralPublicKey =
+                          getExtendedEphemeralPublicKey(
+                            ephemeralKeyPair.getPublicKey()
                           );
-                        }
+
+                        setExtendedEphemeralPublicKey(
+                          extendedEphemeralPublicKey
+                        );
                       } else {
                         console.error(
                           "Ephemeral Key pair local storage item not found"
                         );
                       }
-                      const extendedEphemeralPublicKey =
-                        getExtendedEphemeralPublicKey(
-                          (ephemeralKeyPair as Ed25519Keypair).getPublicKey()
-                        );
-
-                      setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
                     }}
                   >
                     Generate the extended ephemeral public key
@@ -686,7 +682,6 @@ ${JSON.stringify(decodedJwt, null, 2)}`
               </Box>
             }
           </Box>
-        </div>
       )}
     </Box>
   );
