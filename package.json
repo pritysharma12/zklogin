@@ -14,9 +14,11 @@
     "@testing-library/jest-dom": "^6.2.0",
     "@types/jest": "^29.5.11",
     "@types/react-dom": "^18.2.18",
+    "@types/react-helmet": "^6.1.11",
     "@types/react-syntax-highlighter": "^15.5.11",
     "@types/testing-library__react": "^10.2.0",
-    "react-scripts": "^5.0.1"
+    "react-scripts": "^5.0.1",
+    "source-map-loader": "^4.0.2"
   },
   "browserslist": {
     "production": [
@@ -45,6 +47,7 @@
     "jwt-decode": "^4.0.0",
     "notistack": "^3.0.1",
     "query-string": "^8.1.0",
+    "react-helmet": "^6.1.0",
     "react-i18next": "^14.0.0",
     "react-router-dom": "^6.21.1",
     "react-syntax-highlighter": "^15.5.0",

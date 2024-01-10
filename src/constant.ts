@@ -1,8 +1,6 @@
 export const FULLNODE_URL = "https://fullnode.devnet.sui.io";
 
 export const CLIENT_ID =
-// "xapp-1-A06CAAUEM9V-6435447270340-6635080828e0e7f78ac96c0c4d10920f615ee28ff9321bc53371e74787ea8beb";
-  // "621510391892-s72fldl22eh410e6bht073ab8k01aqal.apps.googleusercontent.com";
   "621510391892-s72fldl22eh410e6bht073ab8k01aqal.apps.googleusercontent.com";
 
 export const REDIRECT_URI = "https://main.dzu7rc59pvr8g.amplifyapp.com";
