@@ -102,31 +102,34 @@ function LoginComponent() {
 
       // generating salt
       const salt = generateRandomness();
-      console.log("salt : ",salt)
-      console.log("jwtstring : ",jwtString)
+      console.log("salt : ", salt);
+      console.log("jwtstring : ", oauthParams.id_token);
       window.localStorage.setItem(USER_SALT_LOCAL_STORAGE_KEY, salt);
       setUserSalt(salt);
-      if (!salt || !jwtString) {
+      if (!salt || !oauthParams.id_token) {
         return;
       }
-      console.log("jwtString ::: ", jwtString);
+      console.log("jwtString ::: ", oauthParams.id_token as string);
       // user address
-      const zkLoginUserAddress = jwtToAddress(jwtString, salt);
+      const zkLoginUserAddress = jwtToAddress(oauthParams.id_token as string, salt);
       console.log("zkLoginUserAddress ::: ", zkLoginUserAddress);
       setZkLoginUserAddress(zkLoginUserAddress);
-      console.log("ephemeralKeyPair : ",ephemeralKeyPair)
-      console.log("ephemeralKeyPair  public key: ",ephemeralKeyPair?.getPublicKey)
+      console.log("ephemeralKeyPair : ", ephemeralKeyPair);
+      console.log(
+        "ephemeralKeyPair  public key: ",
+        ephemeralKeyPair?.getPublicKey
+      );
 
       // extendedEphemeralPublicKey
       if (!ephemeralKeyPair) {
         return;
       }
-    
+
       const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
         ephemeralKeyPair.getPublicKey()
       );
 
-      console.log("extendedEphemeralPublicKey : ",extendedEphemeralPublicKey)
+      console.log("extendedEphemeralPublicKey : ", extendedEphemeralPublicKey);
 
       setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
     }
@@ -301,12 +304,15 @@ ${JSON.stringify(decodedJwt, null, 2)}`
             </Stack>
           </Box>
           <div>
-            <p>User Salt: {userSalt ? userSalt : ""}</p>
             <p>
-              User Hydro Address: {zkLoginUserAddress ? zkLoginUserAddress : ""}
+              <b>User Salt:</b> {userSalt ? userSalt : ""}
             </p>
             <p>
-              Balance:{" "}
+              <b>User Hydro Address:</b>{" "}
+              {zkLoginUserAddress ? zkLoginUserAddress : ""}
+            </p>
+            <p>
+              <b>Balance:</b>{" "}
               {addressBalance
                 ? BigNumber(addressBalance?.totalBalance)
                     .div(MIST_PER_SUI.toString())
@@ -314,9 +320,8 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                 : "0 HYDRO"}
             </p>
             <p>
-              {extendedEphemeralPublicKey
-                ? "extendedEphemeralPublicKey" + extendedEphemeralPublicKey
-                : ""}
+              <b>extendedEphemeralPublicKey:</b>{" "}
+              {extendedEphemeralPublicKey ? extendedEphemeralPublicKey : ""}
             </p>
             <br />
             <LoadingButton
