@@ -12,6 +12,7 @@ import { SerializedSignature } from "@mysten/sui.js/cryptography";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useLocation } from "react-router-dom";
 import { BigNumber } from "bignumber.js";
+import { fromB64 } from "@mysten/bcs";
 import {
   genAddressSeed,
   generateNonce,
@@ -109,29 +110,43 @@ function LoginComponent() {
       if (!salt || !oauthParams.id_token) {
         return;
       }
-      console.log("jwtString ::: ", oauthParams.id_token as string);
       // user address
-      const zkLoginUserAddress = jwtToAddress(oauthParams.id_token as string, salt);
+      const zkLoginUserAddress = jwtToAddress(
+        oauthParams.id_token as string,
+        salt
+      );
       console.log("zkLoginUserAddress ::: ", zkLoginUserAddress);
       setZkLoginUserAddress(zkLoginUserAddress);
       console.log("ephemeralKeyPair : ", ephemeralKeyPair);
-      console.log(
-        "ephemeralKeyPair  public key: ",
-        ephemeralKeyPair?.getPublicKey
-      );
 
       // extendedEphemeralPublicKey
-      if (!ephemeralKeyPair) {
-        return;
-      }
+      // if (!ephemeralKeyPair) {
+      //   return;
+      // }
+      // const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
+      //   ephemeralKeyPair.getPublicKey()
+      // );
 
-      const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
-        ephemeralKeyPair.getPublicKey()
+      // console.log("extendedEphemeralPublicKey : ", extendedEphemeralPublicKey);
+      // setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
+
+      const serializedKeyPair = window.localStorage.getItem(
+        KEY_PAIR_SESSION_STORAGE_KEY
       );
 
-      console.log("extendedEphemeralPublicKey : ", extendedEphemeralPublicKey);
+      if (serializedKeyPair) {
+        const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(
+          fromB64(serializedKeyPair)
+        );
+        console.log("ephemeralKeyPair ::: ", ephemeralKeyPair);
 
-      setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
+        setEphemeralKeyPair(ephemeralKeyPair);
+        const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
+          ephemeralKeyPair.getPublicKey()
+        );
+        console.log("extendedEphemeralPublicKey : ", extendedEphemeralPublicKey);
+        setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
+      }
     }
   }, [oauthParams]);
 
