@@ -150,6 +150,10 @@ function LoginComponent() {
         );
         setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
       }
+
+      console.log("randomness: ",randomness)
+      console.log("extendedEphemeralPublicKey",extendedEphemeralPublicKey)
+      console.log("salt: ",userSalt)
     }
   }, [oauthParams]);
 
@@ -365,21 +369,16 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                 }}
               >
                 Fetch ZK Proof (Groth16)
-                {!oauthParams?.id_token && oauthParams?.id_token}
-                {!extendedEphemeralPublicKey ?? extendedEphemeralPublicKey}
-                {!window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY)}
-                {!randomness ?? randomness}
-                {!userSalt ?? userSalt}
               </Typography>
               <LoadingButton
                 loading={fetchingZKProof}
                 variant="contained"
                 disabled={
                   !oauthParams?.id_token ||
-                  !extendedEphemeralPublicKey ||
+                  // !extendedEphemeralPublicKey ||
                   !window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY) ||
-                  !randomness ||
-                  !userSalt
+                  !window.localStorage.getItem(RANDOMNESS_SESSION_STORAGE_KEY) ||
+                  !window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY)
                 }
                 onClick={async () => {
                   try {
