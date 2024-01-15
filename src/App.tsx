@@ -16,7 +16,6 @@ function App() {
             <title>zklogin</title>
           </Helmet>
           <LoginComponent/>
-          {/* <AuthComponent /> */}
         </Router>
       </SuiClientProvider>
     </QueryClientProvider>

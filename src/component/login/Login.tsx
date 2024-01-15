@@ -59,7 +59,6 @@ function LoginComponent() {
   const [randomness, setRandomness] = useState("");
   const [executingTxn, setExecutingTxn] = useState(false);
   const [executeDigest, setExecuteDigest] = useState("");
-  const [isButtonDisabled, setButtonDisabled] = useState(false);
 
   // query jwt id_token
   const [requestingFaucet, setRequestingFaucet] = useState(false);
@@ -100,29 +99,37 @@ function LoginComponent() {
       setDecodedJwt(decodedJwt);
       setActiveStep(1);
       console.log("active step : ", activeStep);
-    }
-  }, [oauthParams]);
 
-  useEffect(() => {
-    const salt = generateRandomness();
-    window.localStorage.setItem(USER_SALT_LOCAL_STORAGE_KEY, salt);
-    setUserSalt(salt);
-    if (!salt || !jwtString) {
-      return;
-    }
-    console.log("jwtString ::: ", jwtString);
-    const zkLoginUserAddress = jwtToAddress(jwtString, salt);
-    console.log("zkLoginUserAddress ::: ", zkLoginUserAddress);
-    setZkLoginUserAddress(zkLoginUserAddress);
+      // generating salt
+      const salt = generateRandomness();
+      console.log("salt : ",salt)
+      console.log("jwtstring : ",jwtString)
+      window.localStorage.setItem(USER_SALT_LOCAL_STORAGE_KEY, salt);
+      setUserSalt(salt);
+      if (!salt || !jwtString) {
+        return;
+      }
+      console.log("jwtString ::: ", jwtString);
+      // user address
+      const zkLoginUserAddress = jwtToAddress(jwtString, salt);
+      console.log("zkLoginUserAddress ::: ", zkLoginUserAddress);
+      setZkLoginUserAddress(zkLoginUserAddress);
+      console.log("ephemeralKeyPair : ",ephemeralKeyPair)
+      console.log("ephemeralKeyPair  public key: ",ephemeralKeyPair?.getPublicKey)
 
-    if (!ephemeralKeyPair) {
-      return;
-    }
-    const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
-      ephemeralKeyPair.getPublicKey()
-    );
+      // extendedEphemeralPublicKey
+      if (!ephemeralKeyPair) {
+        return;
+      }
+    
+      const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
+        ephemeralKeyPair.getPublicKey()
+      );
 
-    setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
+      console.log("extendedEphemeralPublicKey : ",extendedEphemeralPublicKey)
+
+      setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
+    }
   }, [oauthParams]);
 
   // query zkLogin address balance
@@ -139,88 +146,92 @@ function LoginComponent() {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "80vh",
-        }}
-      >
-        <Button
-          sx={{
-            mt: "24px",
-          }}
-          variant="contained"
-          disabled={isButtonDisabled}
-          onClick={async () => {
-            const ephemeralKeyPair = Ed25519Keypair.generate();
-            window.sessionStorage.setItem(
-              KEY_PAIR_SESSION_STORAGE_KEY,
-              ephemeralKeyPair.export().privateKey
-            );
-            window.localStorage.setItem(
-              KEY_PAIR_SESSION_STORAGE_KEY,
-              ephemeralKeyPair.export().privateKey
-            );
-            setEphemeralKeyPair(ephemeralKeyPair);
-
-            // Step 2: Fetch Current Epoch
-            const { epoch } = await suiClient.getLatestSuiSystemState();
-            window.localStorage.setItem(
-              MAX_EPOCH_LOCAL_STORAGE_KEY,
-              String(Number(epoch) + 10)
-            );
-            setMaxEpoch(Number(epoch) + 10);
-
-            // Step 3: Generate Randomness
-            const randomness = generateRandomness();
-            window.sessionStorage.setItem(
-              RANDOMNESS_SESSION_STORAGE_KEY,
-              randomness
-            );
-            window.localStorage.setItem(
-              RANDOMNESS_SESSION_STORAGE_KEY,
-              randomness
-            );
-            setRandomness(randomness);
-
-            // Step 4: Generate Nonce
-            const nonce = generateNonce(
-              ephemeralKeyPair.getPublicKey(),
-              Number(window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY)),
-              randomness
-            );
-            setNonce(nonce);
-            console.log("ephemeralKeyPair", ephemeralKeyPair);
-            console.log("maxepoch", Number(window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY)));
-            console.log("randomness", randomness);
-            console.log("nonce", nonce);
-
-            const params = new URLSearchParams({
-              client_id: CLIENT_ID,
-              redirect_uri: REDIRECT_URI,
-              response_type: "id_token",
-              scope: "openid",
-              nonce: nonce,
-            });
-            const loginURL = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
-            setButtonDisabled(true)
-            window.location.replace(loginURL);
-
+      {activeStep === 0 && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "80vh",
           }}
         >
-          <img
-            src={GoogleLogo}
-            width="16px"
-            style={{
-              marginRight: "8px",
+          <Button
+            sx={{
+              mt: "24px",
             }}
-            alt="Google"
-          />{" "}
-          Sign In With Google
-        </Button>
-      </div>
+            variant="contained"
+            onClick={async () => {
+              const ephemeralKeyPair = Ed25519Keypair.generate();
+              window.sessionStorage.setItem(
+                KEY_PAIR_SESSION_STORAGE_KEY,
+                ephemeralKeyPair.export().privateKey
+              );
+              window.localStorage.setItem(
+                KEY_PAIR_SESSION_STORAGE_KEY,
+                ephemeralKeyPair.export().privateKey
+              );
+              setEphemeralKeyPair(ephemeralKeyPair);
+
+              // Step 2: Fetch Current Epoch
+              const { epoch } = await suiClient.getLatestSuiSystemState();
+              window.localStorage.setItem(
+                MAX_EPOCH_LOCAL_STORAGE_KEY,
+                String(Number(epoch) + 10)
+              );
+              setMaxEpoch(Number(epoch) + 10);
+
+              // Step 3: Generate Randomness
+              const randomness = generateRandomness();
+              window.sessionStorage.setItem(
+                RANDOMNESS_SESSION_STORAGE_KEY,
+                randomness
+              );
+              window.localStorage.setItem(
+                RANDOMNESS_SESSION_STORAGE_KEY,
+                randomness
+              );
+              setRandomness(randomness);
+
+              // Step 4: Generate Nonce
+              const nonce = generateNonce(
+                ephemeralKeyPair.getPublicKey(),
+                Number(
+                  window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY)
+                ),
+                randomness
+              );
+              setNonce(nonce);
+              console.log("ephemeralKeyPair", ephemeralKeyPair);
+              console.log(
+                "maxepoch",
+                Number(window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY))
+              );
+              console.log("randomness", randomness);
+              console.log("nonce", nonce);
+
+              const params = new URLSearchParams({
+                client_id: CLIENT_ID,
+                redirect_uri: REDIRECT_URI,
+                response_type: "id_token",
+                scope: "openid",
+                nonce: nonce,
+              });
+              const loginURL = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+              window.location.replace(loginURL);
+            }}
+          >
+            <img
+              src={GoogleLogo}
+              width="16px"
+              style={{
+                marginRight: "8px",
+              }}
+              alt="Google"
+            />{" "}
+            Sign In With Google
+          </Button>
+        </div>
+      )}
 
       {activeStep === 1 && (
         <div>
@@ -350,7 +361,11 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       {
                         jwt: oauthParams?.id_token as string,
                         extendedEphemeralPublicKey: extendedEphemeralPublicKey,
-                        maxEpoch: Number(window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY)),
+                        maxEpoch: Number(
+                          window.localStorage.getItem(
+                            MAX_EPOCH_LOCAL_STORAGE_KEY
+                          )
+                        ),
                         jwtRandomness: randomness,
                         salt: userSalt,
                         keyClaimName: "sub",
@@ -438,8 +453,14 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                         decodedJwt.aud as string
                       ).toString();
 
-                      setMaxEpoch(Number(window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY)));
-                      console.log("maxEpoch : ",maxEpoch)
+                      setMaxEpoch(
+                        Number(
+                          window.localStorage.getItem(
+                            MAX_EPOCH_LOCAL_STORAGE_KEY
+                          )
+                        )
+                      );
+                      console.log("maxEpoch : ", maxEpoch);
 
                       const zkLoginSignature: SerializedSignature =
                         getZkLoginSignature({
