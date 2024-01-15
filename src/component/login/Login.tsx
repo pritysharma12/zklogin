@@ -31,6 +31,7 @@ import {
   SUI_DEVNET_FAUCET,
   SUI_PROVER_DEV_ENDPOINT,
   USER_SALT_LOCAL_STORAGE_KEY,
+  EXTENDED_KEY,
 } from "../../constant";
 import axios from "axios";
 import { enqueueSnackbar } from "notistack";
@@ -104,7 +105,6 @@ function LoginComponent() {
       // generating salt
       const salt = generateRandomness();
       console.log("salt : ", salt);
-      console.log("jwtstring : ", oauthParams.id_token);
       window.localStorage.setItem(USER_SALT_LOCAL_STORAGE_KEY, salt);
       setUserSalt(salt);
       if (!salt || !oauthParams.id_token) {
@@ -117,18 +117,6 @@ function LoginComponent() {
       );
       console.log("zkLoginUserAddress ::: ", zkLoginUserAddress);
       setZkLoginUserAddress(zkLoginUserAddress);
-      console.log("ephemeralKeyPair : ", ephemeralKeyPair);
-
-      // extendedEphemeralPublicKey
-      // if (!ephemeralKeyPair) {
-      //   return;
-      // }
-      // const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
-      //   ephemeralKeyPair.getPublicKey()
-      // );
-
-      // console.log("extendedEphemeralPublicKey : ", extendedEphemeralPublicKey);
-      // setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
 
       const serializedKeyPair = window.localStorage.getItem(
         KEY_PAIR_SESSION_STORAGE_KEY
@@ -148,12 +136,9 @@ function LoginComponent() {
           "extendedEphemeralPublicKey : ",
           extendedEphemeralPublicKey
         );
+        window.localStorage.setItem(EXTENDED_KEY, extendedEphemeralPublicKey);
         setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
       }
-
-      console.log("randomness: ",randomness)
-      console.log("extendedEphemeralPublicKey",extendedEphemeralPublicKey)
-      console.log("salt: ",userSalt)
     }
   }, [oauthParams]);
 
@@ -375,9 +360,11 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                 variant="contained"
                 disabled={
                   !oauthParams?.id_token ||
-                  // !extendedEphemeralPublicKey ||
+                  !window.localStorage.getItem(EXTENDED_KEY) ||
                   !window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY) ||
-                  !window.localStorage.getItem(RANDOMNESS_SESSION_STORAGE_KEY) ||
+                  !window.localStorage.getItem(
+                    RANDOMNESS_SESSION_STORAGE_KEY
+                  ) ||
                   !window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY)
                 }
                 onClick={async () => {
@@ -387,14 +374,16 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       SUI_PROVER_DEV_ENDPOINT,
                       {
                         jwt: oauthParams?.id_token as string,
-                        extendedEphemeralPublicKey: extendedEphemeralPublicKey,
+                        extendedEphemeralPublicKey: window.localStorage.getItem(EXTENDED_KEY),
                         maxEpoch: Number(
                           window.localStorage.getItem(
                             MAX_EPOCH_LOCAL_STORAGE_KEY
                           )
                         ),
-                        jwtRandomness: randomness,
-                        salt: userSalt,
+                        jwtRandomness: window.localStorage.getItem(
+                          RANDOMNESS_SESSION_STORAGE_KEY
+                        ),
+                        salt: window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY),
                         keyClaimName: "sub",
                       },
                       {
@@ -408,7 +397,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       variant: "success",
                     });
                   } catch (error: any) {
-                    console.error(error);
+                    console.error("error ",error);
                     enqueueSnackbar(
                       String(error?.response?.data?.message || error),
                       {
