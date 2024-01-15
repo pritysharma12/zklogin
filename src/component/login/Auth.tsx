@@ -144,6 +144,7 @@ function AuthComponent() {
       Number(epoch) + 10,
       randomness
     );
+    console.log("nonce : ", nonce);
     window.sessionStorage.setItem(NONCE_SESSION_STORAGE_KEY, nonce);
     window.localStorage.setItem(NONCE_SESSION_STORAGE_KEY, nonce);
   };
@@ -210,6 +211,7 @@ function AuthComponent() {
                   const newNonce =
                     localStorage.getItem(NONCE_SESSION_STORAGE_KEY) ??
                     "default_value";
+                  console.log("newNonce : ", newNonce);
                   const params = new URLSearchParams({
                     client_id: CLIENT_ID,
                     redirect_uri: REDIRECT_URI,
