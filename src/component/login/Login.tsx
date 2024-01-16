@@ -13,6 +13,8 @@ import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useLocation } from "react-router-dom";
 import { BigNumber } from "bignumber.js";
 import { fromB64 } from "@mysten/bcs";
+// import { generateMnemonic, validateMnemonic } from 'bip39';
+// import { Buffer } from 'buffer-es6';
 import {
   genAddressSeed,
   generateNonce,
@@ -42,6 +44,8 @@ export type PartialZkLoginSignature = Omit<
 >;
 
 const suiClient = new SuiClient({ url: FULLNODE_URL });
+// Now you can use Buffer in your code
+// const myBuffer = new Buffer('example', 'utf-8');
 function LoginComponent() {
   const [ephemeralKeyPair, setEphemeralKeyPair] = useState<Ed25519Keypair>();
   const [oauthParams, setOauthParams] =
@@ -102,6 +106,8 @@ function LoginComponent() {
       setActiveStep(1);
       console.log("active step : ", activeStep);
 
+      // check previous salt
+      // const previousSalt = window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY);
       // generating salt
       const salt = generateRandomness();
       console.log("salt : ", salt);
@@ -183,12 +189,13 @@ function LoginComponent() {
               setEphemeralKeyPair(ephemeralKeyPair);
 
               // Step 2: Fetch Current Epoch
-              const { epoch } = await suiClient.getLatestSuiSystemState();
+              const { epochDurationMs, epoch } = await suiClient.getLatestSuiSystemState();
+              console.log("epochDurationMs :::" ,epochDurationMs);
               window.localStorage.setItem(
                 MAX_EPOCH_LOCAL_STORAGE_KEY,
-                String(Number(epoch) + 10)
+                String(Number(epoch) + 1)
               );
-              setMaxEpoch(Number(epoch) + 10);
+              setMaxEpoch(Number(epoch) + 1);
 
               // Step 3: Generate Randomness
               const randomness = generateRandomness();
