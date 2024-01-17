@@ -108,16 +108,16 @@ function LoginComponent() {
 
       // check previous salt
       let salt = window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY);
-      console.log("salt in storage",salt)
-      if(!salt){
+      console.log("salt in storage", salt);
+      if (!salt) {
         // generating salt
         salt = generateRandomness();
         window.localStorage.setItem(USER_SALT_LOCAL_STORAGE_KEY, salt);
         setUserSalt(salt);
-        console.log("salt inside if : ",salt)
+        console.log("salt inside if : ", salt);
       }
       // const salt = generateRandomness();
-      console.log("salt : ", salt);
+      console.log("salt : ", salt, userSalt);
       if (!salt || !oauthParams.id_token) {
         return;
       }
@@ -194,8 +194,9 @@ function LoginComponent() {
               setEphemeralKeyPair(ephemeralKeyPair);
 
               // Step 2: Fetch Current Epoch
-              const { epochDurationMs, epoch } = await suiClient.getLatestSuiSystemState();
-              console.log("epochDurationMs :::" ,epochDurationMs);
+              const { epochDurationMs, epoch } =
+                await suiClient.getLatestSuiSystemState();
+              console.log("epochDurationMs :::", epochDurationMs);
               window.localStorage.setItem(
                 MAX_EPOCH_LOCAL_STORAGE_KEY,
                 String(Number(epoch) + 1)
@@ -324,7 +325,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`
           </Box>
           <div>
             <p>
-              <b>User Salt:</b> {userSalt ? userSalt : ""}
+              <b>User Salt:</b> {userSalt !== "" ? userSalt : ""}
             </p>
             <p>
               <b>User Hydro Address:</b>{" "}
@@ -386,7 +387,8 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       SUI_PROVER_DEV_ENDPOINT,
                       {
                         jwt: oauthParams?.id_token as string,
-                        extendedEphemeralPublicKey: window.localStorage.getItem(EXTENDED_KEY),
+                        extendedEphemeralPublicKey:
+                          window.localStorage.getItem(EXTENDED_KEY),
                         maxEpoch: Number(
                           window.localStorage.getItem(
                             MAX_EPOCH_LOCAL_STORAGE_KEY
@@ -395,7 +397,9 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                         jwtRandomness: window.localStorage.getItem(
                           RANDOMNESS_SESSION_STORAGE_KEY
                         ),
-                        salt: window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY),
+                        salt: window.localStorage.getItem(
+                          USER_SALT_LOCAL_STORAGE_KEY
+                        ),
                         keyClaimName: "sub",
                       },
                       {
@@ -409,7 +413,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       variant: "success",
                     });
                   } catch (error: any) {
-                    console.error("error ",error);
+                    console.error("error ", error);
                     enqueueSnackbar(
                       String(error?.response?.data?.message || error),
                       {
