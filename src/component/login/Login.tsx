@@ -117,7 +117,7 @@ function LoginComponent() {
         console.log("salt inside if : ", salt);
       }
       // const salt = generateRandomness();
-      console.log("salt : ", salt, userSalt);
+      console.log("salt : ", salt);
       if (!salt || !oauthParams.id_token) {
         return;
       }
