@@ -1,4 +1,4 @@
-export const FULLNODE_URL = "https://fullnode.devnet.sui.io";
+export const FULLNODE_URL = "https://fullnode.testnet.sui.io:";
 
 export const CLIENT_ID =
   "621510391892-s72fldl22eh410e6bht073ab8k01aqal.apps.googleusercontent.com";
@@ -7,9 +7,9 @@ export const REDIRECT_URI =
 // "localhost:3000"
 "https://main.d2d1g7aieyqxzh.amplifyapp.com";
 
-export const SUI_DEVNET_FAUCET = "https://faucet.devnet.sui.io/gas";
+export const SUI_DEVNET_FAUCET = "https://faucet.testnet.sui.io/gas"; //"https://faucet.devnet.sui.io/gas";
 
-export const SUI_PROVER_DEV_ENDPOINT = "https://prover-dev.mystenlabs.com/v1";
+export const SUI_PROVER_DEV_ENDPOINT = "https://prover-test.mystenlabs.com/v1";
 
 export const KEY_PAIR_SESSION_STORAGE_KEY = "demo_ephemeral_key_pair";
 export const EXTENDED_KEY = "extended_key";

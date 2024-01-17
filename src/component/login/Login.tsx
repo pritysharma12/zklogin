@@ -107,12 +107,17 @@ function LoginComponent() {
       console.log("active step : ", activeStep);
 
       // check previous salt
-      // const previousSalt = window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY);
-      // generating salt
-      const salt = generateRandomness();
+      let salt = window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY);
+      console.log("salt in storage",salt)
+      if(!salt){
+        // generating salt
+        salt = generateRandomness();
+        window.localStorage.setItem(USER_SALT_LOCAL_STORAGE_KEY, salt);
+        setUserSalt(salt);
+        console.log("salt inside if : ",salt)
+      }
+      // const salt = generateRandomness();
       console.log("salt : ", salt);
-      window.localStorage.setItem(USER_SALT_LOCAL_STORAGE_KEY, salt);
-      setUserSalt(salt);
       if (!salt || !oauthParams.id_token) {
         return;
       }
