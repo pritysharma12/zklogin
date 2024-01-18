@@ -44,8 +44,6 @@ export type PartialZkLoginSignature = Omit<
 >;
 
 const suiClient = new SuiClient({ url: FULLNODE_URL });
-// Now you can use Buffer in your code
-// const myBuffer = new Buffer('example', 'utf-8');
 function LoginComponent() {
   const [ephemeralKeyPair, setEphemeralKeyPair] = useState<Ed25519Keypair>();
   const [oauthParams, setOauthParams] =
@@ -104,20 +102,15 @@ function LoginComponent() {
       setJwtString(oauthParams.id_token as string);
       setDecodedJwt(decodedJwt);
       setActiveStep(1);
-      console.log("active step : ", activeStep);
 
       // check previous salt
       let salt = window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY);
-      console.log("salt in storage", salt);
       if (!salt) {
         // generating salt
         salt = generateRandomness();
         window.localStorage.setItem(USER_SALT_LOCAL_STORAGE_KEY, salt);
         setUserSalt(salt);
-        console.log("salt inside if : ", salt);
       }
-      // const salt = generateRandomness();
-      console.log("salt : ", salt);
       if (!salt || !oauthParams.id_token) {
         return;
       }
@@ -126,7 +119,6 @@ function LoginComponent() {
         oauthParams.id_token as string,
         salt
       );
-      console.log("zkLoginUserAddress ::: ", zkLoginUserAddress);
       setZkLoginUserAddress(zkLoginUserAddress);
 
       const serializedKeyPair = window.localStorage.getItem(
@@ -137,16 +129,12 @@ function LoginComponent() {
         const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(
           fromB64(serializedKeyPair)
         );
-        console.log("ephemeralKeyPair ::: ", ephemeralKeyPair);
 
         setEphemeralKeyPair(ephemeralKeyPair);
         const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
           ephemeralKeyPair.getPublicKey()
         );
-        console.log(
-          "extendedEphemeralPublicKey : ",
-          extendedEphemeralPublicKey
-        );
+        
         window.localStorage.setItem(EXTENDED_KEY, extendedEphemeralPublicKey);
         setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
       }
@@ -194,9 +182,8 @@ function LoginComponent() {
               setEphemeralKeyPair(ephemeralKeyPair);
 
               // Step 2: Fetch Current Epoch
-              const { epochDurationMs, epoch } =
+              const { epoch } =
                 await suiClient.getLatestSuiSystemState();
-              console.log("epochDurationMs :::", epochDurationMs);
               window.localStorage.setItem(
                 MAX_EPOCH_LOCAL_STORAGE_KEY,
                 String(Number(epoch) + 1)
@@ -224,13 +211,6 @@ function LoginComponent() {
                 randomness
               );
               setNonce(nonce);
-              console.log("ephemeralKeyPair", ephemeralKeyPair);
-              console.log(
-                "maxepoch",
-                Number(window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY))
-              );
-              console.log("randomness", randomness);
-              console.log("nonce", nonce);
 
               const params = new URLSearchParams({
                 client_id: CLIENT_ID,
@@ -325,7 +305,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`
           </Box>
           <div>
             <p>
-              <b>User Salt:</b> {userSalt !== "" ? userSalt : ""}
+              <b>User Salt:</b> {localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY)}
             </p>
             <p>
               <b>User Hydro Address:</b>{" "}
@@ -492,7 +472,6 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                           )
                         )
                       );
-                      console.log("maxEpoch : ", maxEpoch);
 
                       const zkLoginSignature: SerializedSignature =
                         getZkLoginSignature({
