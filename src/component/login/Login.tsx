@@ -526,13 +526,20 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                         )
                       );
 
+                      console.log("epoch ",maxEpoch)
+                      const signatureExpiry = Number(window.localStorage.getItem(
+                        MAX_EPOCH_LOCAL_STORAGE_KEY
+                      ));
+
+                      console.log("epoch signatureExpiry ",signatureExpiry)
+
                       const zkLoginSignature: SerializedSignature =
                         getZkLoginSignature({
                           inputs: {
                             ...zkProof,
                             addressSeed,
                           },
-                          maxEpoch,
+                          maxEpoch: signatureExpiry,
                           userSignature,
                         });
 
