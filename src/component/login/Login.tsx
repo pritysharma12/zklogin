@@ -13,6 +13,7 @@ import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useLocation } from "react-router-dom";
 import { BigNumber } from "bignumber.js";
 import { fromB64 } from "@mysten/bcs";
+import { computeZkLoginAddressFromSeed } from "@mysten/sui.js/zklogin";
 // import { generateMnemonic, validateMnemonic } from 'bip39';
 // import { Buffer } from 'buffer-es6';
 import {
@@ -121,6 +122,14 @@ function LoginComponent() {
       );
       setZkLoginUserAddress(zkLoginUserAddress);
 
+      addressBalance(zkLoginUserAddress)
+        .then((totalBalance) => {
+          window.sessionStorage.setItem("balance", totalBalance);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+
       const serializedKeyPair = window.localStorage.getItem(
         KEY_PAIR_SESSION_STORAGE_KEY
       );
@@ -134,7 +143,7 @@ function LoginComponent() {
         const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
           ephemeralKeyPair.getPublicKey()
         );
-        
+
         window.localStorage.setItem(EXTENDED_KEY, extendedEphemeralPublicKey);
         setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
       }
@@ -142,16 +151,48 @@ function LoginComponent() {
   }, [oauthParams]);
 
   // query zkLogin address balance
-  const { data: addressBalance } = useSuiClientQuery(
-    "getBalance",
-    {
-      owner: zkLoginUserAddress,
-    },
-    {
-      enabled: Boolean(zkLoginUserAddress),
-      refetchInterval: 1500,
+  const addressBalance = async (wallet: string) => {
+    try {
+      const bal = await suiClient.getBalance({ owner: wallet });
+      return bal.totalBalance;
+    } catch (error) {
+      // Handle the error here
+      console.error("Error fetching balance:", error);
+      throw error;
     }
-  );
+  };
+
+  function calculateHydroBalance() {
+    // Retrieve the value from sessionStorage
+    const addressBalance = sessionStorage.getItem("balance");
+
+    // Check if the value exists
+    if (addressBalance) {
+      // Perform calculations on the retrieved value
+      const totalBalance = BigNumber(addressBalance)
+        .div(MIST_PER_SUI.toString())
+        .toFixed(6);
+
+      // Concatenate the result with " SUI"
+      const result = totalBalance + " SUI";
+
+      // Return the result
+      return result;
+    } else {
+      // If the value doesn't exist in sessionStorage, return "0 SUI"
+      return "0 SUI";
+    }
+  }
+  // const { data: addressBalance } = useSuiClientQuery(
+  //   "getBalance",
+  //   {
+  //     owner: zkLoginUserAddress,
+  //   },
+  //   {
+  //     enabled: Boolean(zkLoginUserAddress),
+  //     refetchInterval: 1500,
+  //   }
+  // );
 
   return (
     <div>
@@ -170,6 +211,17 @@ function LoginComponent() {
             }}
             variant="contained"
             onClick={async () => {
+              // const addressSeed: string = genAddressSeed(
+              //   "306407678259487695878142978028805670726", //salt
+              //   "sub",
+              //   "109482427028375191762", // decodedJwt.sub,
+              //   "573120070871-0k7ga6ns79ie0jpg1ei6ip5vje2ostt6.apps.googleusercontent.com"
+              //   // decodedJwt.aud as string
+              // ).toString();
+
+              // console.log("addressSeed : ",addressSeed)
+              // const address = computeZkLoginAddressFromSeed(BigInt(addressSeed),"https://accounts.google.com")
+              // console.log("address : ",address)
               const ephemeralKeyPair = Ed25519Keypair.generate();
               window.sessionStorage.setItem(
                 KEY_PAIR_SESSION_STORAGE_KEY,
@@ -182,8 +234,7 @@ function LoginComponent() {
               setEphemeralKeyPair(ephemeralKeyPair);
 
               // Step 2: Fetch Current Epoch
-              const { epoch } =
-                await suiClient.getLatestSuiSystemState();
+              const { epoch } = await suiClient.getLatestSuiSystemState();
               window.localStorage.setItem(
                 MAX_EPOCH_LOCAL_STORAGE_KEY,
                 String(Number(epoch) + 1)
@@ -305,19 +356,15 @@ ${JSON.stringify(decodedJwt, null, 2)}`
           </Box>
           <div>
             <p>
-              <b>User Salt:</b> {localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY)}
+              <b>User Salt:</b>{" "}
+              {localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY)}
             </p>
             <p>
               <b>User Hydro Address:</b>{" "}
               {zkLoginUserAddress ? zkLoginUserAddress : ""}
             </p>
             <p>
-              <b>Balance:</b>{" "}
-              {addressBalance
-                ? BigNumber(addressBalance?.totalBalance)
-                    .div(MIST_PER_SUI.toString())
-                    .toFixed(6) + "HYDRO"
-                : "0 HYDRO"}
+              <b>Balance:</b> {calculateHydroBalance()}
             </p>
             <p>
               <b>extendedEphemeralPublicKey:</b>{" "}
@@ -429,6 +476,10 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                   disabled={!decodedJwt}
                   onClick={async () => {
                     try {
+                      console.log("ephemeralKeyPair",ephemeralKeyPair)
+                      console.log("zkProof",zkProof)
+                      console.log("decodedJwt",decodedJwt)
+                      console.log("userSalt",userSalt)
                       if (
                         !ephemeralKeyPair ||
                         !zkProof ||
