@@ -480,11 +480,13 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       console.log("zkProof",zkProof)
                       console.log("decodedJwt",decodedJwt)
                       console.log("userSalt",userSalt)
+                      const salt = window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY)
+                      console.log("salt",salt)
                       if (
                         !ephemeralKeyPair ||
                         !zkProof ||
                         !decodedJwt ||
-                        !userSalt
+                        !salt
                       ) {
                         return;
                       }
@@ -510,7 +512,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       }
 
                       const addressSeed: string = genAddressSeed(
-                        BigInt(userSalt),
+                        BigInt(salt),
                         "sub",
                         decodedJwt.sub,
                         decodedJwt.aud as string
