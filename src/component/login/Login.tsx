@@ -555,6 +555,8 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                           variant: "success",
                         }
                       );
+                      console.log("executeRes.digest")
+                      localStorage.setItem("response",executeRes.digest)
                       setExecuteDigest(executeRes.digest);
                     } catch (error) {
                       console.error(error);
@@ -568,7 +570,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                 >
                   Execute Transaction Block
                 </LoadingButton>
-                {executeDigest && (
+                {localStorage.getItem("response") && (
                   <Alert severity="success" sx={{ mt: "12px" }}>
                     Execution successful:{" "}
                     <Typography
@@ -579,10 +581,10 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       }}
                     >
                       <a
-                        href={`https://suiexplorer.com/txblock/${executeDigest}?network=devnet`}
+                        href={`https://suiexplorer.com/txblock/${localStorage.getItem("response")}?network=devnet`}
                         target="_blank"
                       >
-                        {executeDigest}
+                        {localStorage.getItem("response")}
                       </a>
                     </Typography>
                   </Alert>
