@@ -494,7 +494,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`
                       const txb = new TransactionBlock();
 
                       const [coin] = txb.splitCoins(txb.gas, [
-                        MIST_PER_SUI * BigInt(0.001),
+                        MIST_PER_SUI * BigInt(1),
                       ]);
                       txb.transferObjects(
                         [coin],
